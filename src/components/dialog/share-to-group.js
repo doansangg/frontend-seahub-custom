@@ -253,7 +253,17 @@ class ShareToGroup extends React.Component {
   listSharedGroups = () => {
     let path = this.props.itemPath;
     let repoID = this.props.repoID;
-    seafileAPI.listSharedItems(repoID, path, 'group').then((res) => {
+    let { itemType } = this.props;
+    
+    // Use different API based on item type
+    let apiCall;
+    if (itemType === 'file') {
+      apiCall = seafileAPI.listSharedFileItems(repoID, path, 'group');
+    } else {
+      apiCall = seafileAPI.listSharedItems(repoID, path, 'group');
+    }
+    
+    apiCall.then((res) => {
       if (res.data.length !== 0) {
         this.setState({
           sharedItems: res.data,
@@ -315,7 +325,17 @@ class ShareToGroup extends React.Component {
         toaster.danger(errMessage);
       });
     } else {
-      seafileAPI.shareFolder(repoID, path, 'group', permission, targetGroupIds).then(res => {
+      let { itemType } = this.props;
+      let apiCall;
+      
+      // Use different API based on item type
+      if (itemType === 'file') {
+        apiCall = seafileAPI.shareFile(repoID, path, 'group', permission, targetGroupIds);
+      } else {
+        apiCall = seafileAPI.shareFolder(repoID, path, 'group', permission, targetGroupIds);
+      }
+      
+      apiCall.then(res => {
         let errorMsg = [];
         if (res.data.failed.length > 0) {
           for (let i = 0 ; i < res.data.failed.length ; i++) {
@@ -358,7 +378,17 @@ class ShareToGroup extends React.Component {
         toaster.danger(errMessage);
       });
     } else {
-      seafileAPI.deleteShareToGroupItem(repoID, path, 'group', groupID).then(() => {
+      let { itemType } = this.props;
+      let apiCall;
+      
+      // Use different API based on item type
+      if (itemType === 'file') {
+        apiCall = seafileAPI.deleteShareToGroupFile(repoID, path, 'group', groupID);
+      } else {
+        apiCall = seafileAPI.deleteShareToGroupItem(repoID, path, 'group', groupID);
+      }
+      
+      apiCall.then(() => {
         eventBus.dispatch(EVENT_BUS_TYPE.UNSHARE_REPO_TO_GROUP, { repo_id: repoID, group_id: groupID });
 
         this.setState({
@@ -383,7 +413,17 @@ class ShareToGroup extends React.Component {
         toaster.danger(errMessage);
       });
     } else {
-      seafileAPI.updateShareToGroupItemPermission(repoID, path, 'group', groupID, permission).then(() => {
+      let { itemType } = this.props;
+      let apiCall;
+      
+      // Use different API based on item type
+      if (itemType === 'file') {
+        apiCall = seafileAPI.updateShareToGroupFilePermission(repoID, path, 'group', groupID, permission);
+      } else {
+        apiCall = seafileAPI.updateShareToGroupItemPermission(repoID, path, 'group', groupID, permission);
+      }
+      
+      apiCall.then(() => {
         this.updateSharedItems(item, permission);
       }).catch(error => {
         let errMessage = Utils.getErrorMsg(error);

@@ -514,6 +514,13 @@ class SeafileAPI {
     return this.req.get(url);
   }
 
+  // shared-files
+  listSharedFileItems(repoID, filePath, shareType) { // shareType: user, group
+    filePath = encodeURIComponent(filePath);
+    const url = this.server + '/api2/repos/' + repoID + '/file/shared_items/?p=' + filePath + '&share_type=' + shareType;
+    return this.req.get(url);
+  }
+
   getBeSharedRepos() { // listBeSharedRepos
     const url = this.server + '/api2/beshared-repos/';
     return this.req.get(url);
@@ -555,6 +562,35 @@ class SeafileAPI {
   updateShareToGroupItemPermission(repoID, path, shareType, groupID, permission) {
     path = encodeURIComponent(path);
     const url = this.server + '/api2/repos/' + repoID + '/dir/shared_items/?p=' + path + '&share_type=' + shareType + '&group_id=' + groupID;
+    let form = new FormData();
+    form.append('permission', permission);
+    return this._sendPostRequest(url, form);
+  }
+
+  // file sharing specific operations
+  deleteShareToUserFile(repoID, filePath, shareType, username) {
+    filePath = encodeURIComponent(filePath);
+    const url = this.server + '/api2/repos/' + repoID + '/file/shared_items/?p=' + filePath + '&share_type=' + shareType + '&username=' + encodeURIComponent(username);
+    return this.req.delete(url);
+  }
+
+  updateShareToUserFilePermission(repoID, filePath, shareType, username, permission) {
+    filePath = encodeURIComponent(filePath);
+    const url = this.server + '/api2/repos/' + repoID + '/file/shared_items/?p=' + filePath + '&share_type=' + shareType + '&username=' + encodeURIComponent(username);
+    let form = new FormData();
+    form.append('permission', permission);
+    return this._sendPostRequest(url, form);
+  }
+
+  deleteShareToGroupFile(repoID, filePath, shareType, groupID) {
+    filePath = encodeURIComponent(filePath);
+    const url = this.server + '/api2/repos/' + repoID + '/file/shared_items/?p=' + filePath + '&share_type=' + shareType + '&group_id=' + groupID;
+    return this.req.delete(url);
+  }
+
+  updateShareToGroupFilePermission(repoID, filePath, shareType, groupID, permission) {
+    filePath = encodeURIComponent(filePath);
+    const url = this.server + '/api2/repos/' + repoID + '/file/shared_items/?p=' + filePath + '&share_type=' + shareType + '&group_id=' + groupID;
     let form = new FormData();
     form.append('permission', permission);
     return this._sendPostRequest(url, form);
@@ -609,6 +645,25 @@ class SeafileAPI {
     return this.req.put(url, form);
   }
 
+  // shared files
+  shareFile(repoID, filePath, shareType, permission, paramArray) { // shareType: user group
+    filePath = encodeURIComponent(filePath);
+    var form = new FormData();
+    form.append('share_type', shareType);
+    form.append('permission', permission);
+    if (shareType == 'user') {
+      for (let i = 0; i < paramArray.length; i++) {
+        form.append('username', paramArray[i]);
+      }
+    } else {
+      for (let i = 0; i < paramArray.length; i++) {
+        form.append('group_id', paramArray[i]);
+      }
+    }
+    const url = this.server + '/api2/repos/' + repoID + '/file/shared_items/?p=' + filePath;
+    return this.req.put(url, form);
+  }
+
   listSharedFolders() {
     const url = this.server + '/api/v2.1/shared-folders/';
     return this.req.get(url);
@@ -621,6 +676,17 @@ class SeafileAPI {
 
   unshareFolder(repoID, options) {
     const url = this.server + '/api2/repos/' + repoID + '/dir/shared_items/';
+    return this.req.delete(url, { params: options });
+  }
+
+  // file sharing operations
+  updateFileSharePerm(repoID, data, options) {
+    const url = this.server + '/api2/repos/' + repoID + '/file/shared_items/';
+    return this.req.post(url, data, { params: options });
+  }
+
+  unshareFile(repoID, options) {
+    const url = this.server + '/api2/repos/' + repoID + '/file/shared_items/';
     return this.req.delete(url, { params: options });
   }
 

@@ -70,7 +70,14 @@ class ShareDialog extends React.Component {
       return 'shareLink';
     } else if (itemType != 'file' && enableUploadLink) {
       return 'uploadLink';
-    } else if (itemType == 'file' || itemType == 'dir') {
+    } else if (itemType == 'file') {
+      // For files, prioritize share to users if available, then internal link
+      if (enableDirPrivateShare && canShareRepo) {
+        return 'shareToUser';
+      } else {
+        return 'internalLink';
+      }
+    } else if (itemType == 'dir') {
       return 'internalLink';
     } else if (enableDirPrivateShare) {
       return 'shareToUser';
@@ -262,6 +269,10 @@ class ShareDialog extends React.Component {
     let activeTab = this.state.activeTab;
     const { itemType, repoEncrypted, userPerm } = this.props;
     const enableShareLink = !repoEncrypted && canGenerateShareLink;
+    let enableFilePrivateShare = false;
+    if (itemType === 'file') {
+      enableFilePrivateShare = true;
+    }
 
     return (
       <Fragment>
@@ -279,6 +290,20 @@ class ShareDialog extends React.Component {
                 {gettext('Internal Link')}
               </NavLink>
             </NavItem>
+            {enableFilePrivateShare && canShareRepo &&
+            <NavItem role="tab" aria-selected={activeTab === 'shareToUser'} aria-controls="share-to-user-panel">
+              <NavLink className={activeTab === 'shareToUser' ? 'active' : ''} onClick={(this.toggle.bind(this, 'shareToUser'))} tabIndex="0" onKeyDown={this.onTabKeyDown}>
+                {gettext('Share to Users')}
+              </NavLink>
+            </NavItem>
+            }
+            {enableFilePrivateShare && canShareRepo &&
+            <NavItem role="tab" aria-selected={activeTab === 'shareToGroup'} aria-controls="share-to-group-panel">
+              <NavLink className={activeTab === 'shareToGroup' ? 'active' : ''} onClick={(this.toggle.bind(this, 'shareToGroup'))} tabIndex="0" onKeyDown={this.onTabKeyDown}>
+                {gettext('Share to Groups')}
+              </NavLink>
+            </NavItem>
+            }
           </Nav>
         </div>
         <div className="share-dialog-main">
@@ -299,6 +324,31 @@ class ShareDialog extends React.Component {
                 <InternalLink
                   path={this.props.itemPath}
                   repoID={this.props.repoID}
+                />
+              </TabPane>
+            }
+            {enableFilePrivateShare && canShareRepo && activeTab === 'shareToUser' &&
+              <TabPane tabId="shareToUser" role="tabpanel" id="share-to-user-panel">
+                <ShareToUser
+                  itemType={this.props.itemType}
+                  isGroupOwnedRepo={this.props.isGroupOwnedRepo}
+                  itemPath={this.props.itemPath}
+                  repoID={this.props.repoID}
+                  isRepoOwner={this.state.isRepoOwner}
+                  onAddCustomPermissionToggle={this.onAddCustomPermissionToggle}
+                />
+              </TabPane>
+            }
+            {enableFilePrivateShare && canShareRepo && activeTab === 'shareToGroup' &&
+              <TabPane tabId="shareToGroup" role="tabpanel" id="share-to-group-panel">
+                <ShareToGroup
+                  itemType={this.props.itemType}
+                  isGroupOwnedRepo={this.props.isGroupOwnedRepo}
+                  itemPath={this.props.itemPath}
+                  repoID={this.props.repoID}
+                  isRepoOwner={this.state.isRepoOwner}
+                  repo={this.props.repo}
+                  onAddCustomPermissionToggle={this.onAddCustomPermissionToggle}
                 />
               </TabPane>
             }

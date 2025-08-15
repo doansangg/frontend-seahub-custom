@@ -278,7 +278,17 @@ class ShareToUser extends React.Component {
   componentDidMount() {
     let path = this.props.itemPath;
     let repoID = this.props.repoID;
-    seafileAPI.listSharedItems(repoID, path, 'user').then((res) => {
+    let { itemType } = this.props;
+    
+    // Use different API based on item type
+    let apiCall;
+    if (itemType === 'file') {
+      apiCall = seafileAPI.listSharedFileItems(repoID, path, 'user');
+    } else {
+      apiCall = seafileAPI.listSharedItems(repoID, path, 'user');
+    }
+    
+    apiCall.then((res) => {
       if (res.data.length !== 0) {
         let tmpUserList = res.data.map(item => {
           return {
@@ -352,7 +362,17 @@ class ShareToUser extends React.Component {
         }
       });
     } else {
-      seafileAPI.shareFolder(repoID, path, 'user', this.state.permission, users).then(res => {
+      let { itemType } = this.props;
+      let apiCall;
+      
+      // Use different API based on item type
+      if (itemType === 'file') {
+        apiCall = seafileAPI.shareFile(repoID, path, 'user', this.state.permission, users);
+      } else {
+        apiCall = seafileAPI.shareFolder(repoID, path, 'user', this.state.permission, users);
+      }
+      
+      apiCall.then(res => {
         let errorMsg = [];
         if (res.data.failed.length > 0) {
           for (let i = 0 ; i < res.data.failed.length ; i++) {
@@ -392,7 +412,17 @@ class ShareToUser extends React.Component {
         toaster.danger(errMessage);
       });
     } else {
-      seafileAPI.deleteShareToUserItem(repoID, path, 'user', username).then(res => {
+      let { itemType } = this.props;
+      let apiCall;
+      
+      // Use different API based on item type
+      if (itemType === 'file') {
+        apiCall = seafileAPI.deleteShareToUserFile(repoID, path, 'user', username);
+      } else {
+        apiCall = seafileAPI.deleteShareToUserItem(repoID, path, 'user', username);
+      }
+      
+      apiCall.then(res => {
         this.setState({
           sharedItems: this.state.sharedItems.filter(item => { return item.user_info.name !== username; })
         });
@@ -415,7 +445,17 @@ class ShareToUser extends React.Component {
         toaster.danger(errMessage);
       });
     } else {
-      seafileAPI.updateShareToUserItemPermission(repoID, path, 'user', username, permission).then(() => {
+      let { itemType } = this.props;
+      let apiCall;
+      
+      // Use different API based on item type
+      if (itemType === 'file') {
+        apiCall = seafileAPI.updateShareToUserFilePermission(repoID, path, 'user', username, permission);
+      } else {
+        apiCall = seafileAPI.updateShareToUserItemPermission(repoID, path, 'user', username, permission);
+      }
+      
+      apiCall.then(() => {
         this.updateSharedItems(item, permission);
       }).catch(error => {
         let errMessage = Utils.getErrorMsg(error);
@@ -481,7 +521,17 @@ class ShareToUser extends React.Component {
         }
       });
     } else {
-      seafileAPI.shareFolder(repoID, path, 'user', this.state.permission, users).then(res => {
+      let { itemType } = this.props;
+      let apiCall;
+      
+      // Use different API based on item type
+      if (itemType === 'file') {
+        apiCall = seafileAPI.shareFile(repoID, path, 'user', this.state.permission, users);
+      } else {
+        apiCall = seafileAPI.shareFolder(repoID, path, 'user', this.state.permission, users);
+      }
+      
+      apiCall.then(res => {
         let errorMsg = [];
         if (res.data.failed.length > 0) {
           for (let i = 0 ; i < res.data.failed.length ; i++) {
